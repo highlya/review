@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <!-- Remote style sheet -->
+</head>
+
+<body>
+</body>
+
+</html>
+<script>
+  function curry(fn, len = fn.length, holder = curry) {
+    return _curry.call(this, fn, len, holder, [], [])
+  }
+  function _curry(fn, len, holder, args, holders) {
+    // console.log(args, 'args')
+    return function (..._args) {
+      let params = _args.slice()
+      let _holders = holders.slice()
+      // 循环入参，  追加真实参数或者真实参数替换占位符
+      _args.forEach((arg, index) => {
+        // 传入占位符且之前不存在占位符
+        if (arg === holder && !holders.length) {
+          // 参数入参并且记录占位符的位置
+          params.push(arg)
+          _holders.push(params.length - 1)
+        }
+        // 传入占位符且之前存在占位符 删除前面占位符
+        if (arg === holder && holders.length) {
+          holders.shift()
+        }
+        if (arg !== holder && holder.length) {
+          // 真实参数  且之前存在占位符  将占位符替换成真实参数
+          let index = _holders.shift()  //返回第一个占位符的位置
+          _holders.splice(_holders.indexOf(index), 1);
+          params[index] = arg
+        }
+        if (arg !== holder && !holder.length) {
+          // 真实参数 且之前不存在占位符
+          params.push(arg)
+        }
+      })
+      if (params.length >= len && params.slice(0, len).every(i => i !== holder)) {
+        return fn.apply(this, _args)
+      } else {
+        return _curry.call(this, fn, len, holder, params, _holders)
+      }
+    }
+  }
+
+  // let _fn = curry(function (a, b, c, d, e) {
+  //   console.log(a, b, c, d, e)
+  // });
+  // _fn(1, 2, 3, 4, 5);     // print: 1,2,3,4,5
+  // _fn(1)(2)(3, 4, 5);   // print: 1,2,3,4,5
+  // _fn(1, 2)(3, 4)(5);   // print: 1,2,3,4,5
+  // _fn(1)(2)(3)(4)(5); // print: 1,2,3,4,5
+  let count = 0
+  let fnc = function (a, b, c, d, e) {
+    count++
+    console.log([a, b, c, d, e], count);
+  }
+  let _ = {}; // 定义占位符
+  let _fn = curry(fnc, 5, _);  // 将函数柯里化，指定所需的参数个数，指定所需的占位符
+  // _fn(1, 2, 3, 4, 5);                 // print: 1,2,3,4,5
+  _fn(_, 2, 3, 4, 5)(1);              // print: 1,2,3,4,5
+  _fn(1, _, 3, 4, 5)(2);              // print: 1,2,3,4,5
+  _fn(1, _, 3)(_, 4, _)(2)(5);         // print: 1,2,3,4,5
+  _fn(1, _, _, 4)(_, 3)(2)(5);        // print: 1,2,3,4,5
+  _fn(_, 2)(_, _, 4)(1)(3)(5);        // print: 1,2,3,4,5
+</script>
