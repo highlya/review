@@ -14,7 +14,7 @@
     return _curry.call(this, fn, len, holder, [], [])
   }
   function _curry(fn, len, holder, args, holders) {
-    // console.log(args, 'args')
+    console.log(args, 'args')
     return function (..._args) {
       let params = _args.slice()
       let _holders = holders.slice()
@@ -42,7 +42,7 @@
         }
       })
       if (params.length >= len && params.slice(0, len).every(i => i !== holder)) {
-        return fn.apply(this, _args)
+        return fn.apply(this, params)
       } else {
         return _curry.call(this, fn, len, holder, params, _holders)
       }
